@@ -1,6 +1,7 @@
 # MazeDefender
 
 This game and readme were written using the Grok AI with light manual editing.
+You can read the full conversation [here](https://grok.com/share/c2hhcmQtMg%3D%3D_10b02b3f-241a-4bdc-9e6a-2ff4753c033e).
 
 MazeDefender is a strategic maze-based game where players must navigate through a dynamically generated maze, collect resources, and defend their base from waves of enemies. The game features a unique blend of exploration, resource management, and tower defense mechanics. Players can build and upgrade towers to fend off enemies, collect pellets for resources, and utilize power-ups for temporary advantages. The game is built using Python and the Pygame library, offering a challenging and engaging experience for players.
 
