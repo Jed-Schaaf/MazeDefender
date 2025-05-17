@@ -17,12 +17,13 @@ class Colors:
     GREEN = (0, 255, 0)
     BLUE = (0, 0, 255)
     YELLOW = (255, 255, 0)
-    LIGHT_YELLOW = (255, 255, 160)
+    LIGHT_YELLOW = (255, 255, 128)
     PURPLE = (128, 0, 128)
     GRAY = (128, 128, 128)
     DARK_GRAY = (64, 64, 64)
     LIGHT_GRAY = (192, 192, 192)
-    LIGHT_BLUE = (173, 216, 230)
+    LIGHT_BLUE = (128, 192, 255)
+    DARK_RED = (160, 0, 0)
 
 def heuristic(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])

@@ -26,26 +26,30 @@ class Tower:
         target, min_dist = None, float('inf')
         bx, by = game.maze.base
         range_ = self.base_range * (1.5 if game.tower_boost_timer > 0 else 1)
+        half_tile_size = Constants.TILE_SIZE // 2
         for e in enemies:
-            dist = math.hypot(e.pos[0] - self.x * Constants.TILE_SIZE - 16, e.pos[1] - self.y * Constants.TILE_SIZE - 16)
+            dist = math.hypot(e.pos[0] - (self.x * Constants.TILE_SIZE + half_tile_size),
+                              e.pos[1] - (self.y * Constants.TILE_SIZE + half_tile_size))
             if dist <= range_:
-                base_dist = abs(e.pos[0] / Constants.TILE_SIZE - bx) + abs(e.pos[1] / Constants.TILE_SIZE - by)
+                base_dist = math.hypot(e.pos[0] - (bx * Constants.TILE_SIZE + half_tile_size),
+                              e.pos[1] - (by * Constants.TILE_SIZE + half_tile_size))
                 if base_dist < min_dist:
                     min_dist = base_dist
                     target = e
         if target:
             self.last_shot = time
-            return Projectile((self.x * Constants.TILE_SIZE + 16, self.y * Constants.TILE_SIZE + 16), target, self.damage)
+            return Projectile((self.x * Constants.TILE_SIZE + half_tile_size,
+                               self.y * Constants.TILE_SIZE + half_tile_size), target, self.damage)
         return None
 
     def draw(self, screen, time, tower_boost_timer):
         size = 28
         offset = (Constants.TILE_SIZE - size) // 2
         pygame.draw.rect(screen, Colors.PURPLE, (self.x * Constants.TILE_SIZE + offset, self.y * Constants.TILE_SIZE + offset, size, size))
-        pygame.draw.polygon(screen, Colors.GRAY, [(self.x * Constants.TILE_SIZE + offset + size/2, self.y * Constants.TILE_SIZE + offset + 4*size/5),
-                                           (self.x * Constants.TILE_SIZE + offset + size/5, self.y * Constants.TILE_SIZE + size),
-                                           (self.x * Constants.TILE_SIZE + offset + 4*size/5, self.y * Constants.TILE_SIZE + size)])
-        center_point = self.y * Constants.TILE_SIZE + Constants.TILE_SIZE//2
+        pygame.draw.polygon(screen, Colors.GRAY, [(self.x * Constants.TILE_SIZE + offset + size / 2, self.y * Constants.TILE_SIZE + offset + size * 4 / 5),
+                                           (self.x * Constants.TILE_SIZE + offset + size / 5, self.y * Constants.TILE_SIZE + size),
+                                           (self.x * Constants.TILE_SIZE + offset + size * 4 / 5, self.y * Constants.TILE_SIZE + size)])
+        center_point = self.y * Constants.TILE_SIZE + Constants.TILE_SIZE // 2
         individual_offset = self.y * 100 + self.x
         phase = math.sin(2 * math.pi * (time + individual_offset) / 1500)
         hover_offset = phase * 4
@@ -79,6 +83,7 @@ class Projectile:
             self.enemy.hit_points -= self.damage
             if self.enemy.hit_points <= 0:
                 enemies.remove(self.enemy)
+                game.destroyed_enemies += 1
                 game.score += 10
             return True
         angle = math.atan2(dy, dx)
@@ -87,7 +92,7 @@ class Projectile:
         return False
 
     def draw(self, screen):
-        dx = self.enemy.pos[0] - self.pos[0]  # Changed to draw line toward enemy
+        dx = self.enemy.pos[0] - self.pos[0]
         dy = self.enemy.pos[1] - self.pos[1]
         dist = math.hypot(dx, dy)
         if dist > 0:

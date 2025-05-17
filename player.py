@@ -8,8 +8,10 @@ from utils import Colors, Constants
 class Player:
     def __init__(self, maze):
         self.maze = maze
-        self.pos = self.pos = [ (self.maze.width // 2) * 32 + 4, (self.maze.height // 2) * 32 + 4 ]
-        self.rect = pygame.Rect(self.pos[0], self.pos[1], 24, 24)
+        self.w = 24
+        self.h = 24
+        self.pos = [ (self.maze.width // 2) * Constants.TILE_SIZE + 4, (self.maze.height // 2) * Constants.TILE_SIZE + 4 ]
+        self.rect = pygame.Rect(self.pos[0], self.pos[1], self.w, self.h)
         self.speed = 2 * Constants.TILE_SIZE / Constants.FPS
         self.resources = 0
         self.direction = 'right'
@@ -19,6 +21,7 @@ class Player:
         self.current_speed = self.speed
         self.moving = False
         self.last_build_time = 0
+        self.slow_timer = 0
 
     def update(self, keys, game, time):
         dx, dy = 0, 0
@@ -34,33 +37,40 @@ class Player:
         self.moving = dx != 0 or dy != 0
 
         new_pos = [self.pos[0] + dx, self.pos[1] + dy]
-        new_rect = pygame.Rect(new_pos[0], new_pos[1], 24, 24)
+        new_rect = pygame.Rect(new_pos[0], new_pos[1], self.w, self.h)
         if not any(new_rect.colliderect(wall) for wall in self.maze.wall_rects):
             self.pos = new_pos
             self.rect = new_rect
 
         if keys[pygame.K_SPACE] and time - self.last_build_time >= 500:
-            x, y = int(self.pos[0] / Constants.TILE_SIZE), int(self.pos[1] / Constants.TILE_SIZE)
-            tower = next((t for t in game.towers if t.x == x and t.y == y), None)
+            center = (int(self.pos[0]) + 12, int(self.pos[1]) + 12)
+            face = ({'right': center[0] + 12, 'left': center[0] - 12, 'up': center[0], 'down': center[0]}[self.direction],
+                    {'right': center[1], 'left': center[1], 'up': center[1] - 12, 'down': center[1] + 12}[self.direction])
+            x, y = face
+            tile_x, tile_y = x // Constants.TILE_SIZE, y // Constants.TILE_SIZE
+            tower = next((t for t in game.towers if
+                          ((t.x * Constants.TILE_SIZE) <= x < ((t.x + 1) * Constants.TILE_SIZE)) and
+                          ((t.y * Constants.TILE_SIZE) <= y < ((t.y + 1) * Constants.TILE_SIZE))), None)
             if tower and tower.level < 10 and self.resources >= tower.level:
                 self.resources -= tower.level
                 tower.upgrade()
-            elif (x, y) not in self.maze.spawn_points and (x, y) != self.maze.base and \
-                    (x, y) not in self.maze.pellets and (x, y) not in self.maze.powerups and \
+            elif (tile_x, tile_y) not in self.maze.spawn_points and (tile_x, tile_y) != self.maze.base and \
+                    (tile_x, tile_y) not in self.maze.pellets and (tile_x, tile_y) not in self.maze.powerups and \
                     not tower and self.resources >= 5:
-                game.towers.append(Tower(x, y))
+                game.towers.append(Tower(tile_x, tile_y))
                 self.resources -= 5
             self.last_build_time = time
 
+        half_tile_size = Constants.TILE_SIZE // 2
         for i, pellet in enumerate(self.maze.pellets):
-            if self.rect.collidepoint(pellet[0] * Constants.TILE_SIZE + 16, pellet[1] * Constants.TILE_SIZE + 16):
+            if self.rect.collidepoint(pellet[0] * Constants.TILE_SIZE + half_tile_size, pellet[1] * Constants.TILE_SIZE + half_tile_size):
                 self.resources += 1
                 game.score += 1
                 del self.maze.pellets[i]
                 break
 
         for i, powerup in enumerate(self.maze.powerups):
-            if self.rect.collidepoint(powerup[0] * Constants.TILE_SIZE + 16, powerup[1] * Constants.TILE_SIZE + 16):
+            if self.rect.collidepoint(powerup[0] * Constants.TILE_SIZE + half_tile_size, powerup[1] * Constants.TILE_SIZE + half_tile_size):
                 effect = random.choice(['speed', 'invincibility', 'tower_boost', 'freeze'])
                 if effect == 'speed':
                     self.speed_boost_timer = 10 * Constants.FPS
@@ -82,6 +92,10 @@ class Player:
         if self.speed_boost_timer > 0:
             self.speed_boost_timer -= 1
             if self.speed_boost_timer <= 0:
+                self.current_speed = self.speed
+        if self.slow_timer > 0:
+            self.slow_timer -= 1
+            if self.slow_timer <= 0:
                 self.current_speed = self.speed
 
     def draw(self, screen, time):

@@ -16,6 +16,7 @@ class Enemy:
         self.hit_points = wave_number
 
     def update(self, player, game):
+        half_tile_size = Constants.TILE_SIZE // 2
         if not self.path:
             start = (int(self.pos[0] / Constants.TILE_SIZE), int(self.pos[1] / Constants.TILE_SIZE))
             if self.behavior == 'shortest':
@@ -28,7 +29,7 @@ class Enemy:
             self.path = a_star(start, self.target, self.maze.grid)
 
         if self.path and game.freeze_timer <= 0:
-            next_pos = (self.path[0][0] * Constants.TILE_SIZE + 16, self.path[0][1] * Constants.TILE_SIZE + 16)
+            next_pos = (self.path[0][0] * Constants.TILE_SIZE + half_tile_size, self.path[0][1] * Constants.TILE_SIZE + half_tile_size)
             dx = next_pos[0] - self.pos[0]
             dy = next_pos[1] - self.pos[1]
             dist = math.hypot(dx, dy)
@@ -40,12 +41,20 @@ class Enemy:
                 self.pos[0] += math.cos(angle) * self.speed
                 self.pos[1] += math.sin(angle) * self.speed
 
-        if math.hypot(self.pos[0] - self.maze.base[0] * Constants.TILE_SIZE - 16,
-                      self.pos[1] - self.maze.base[1] * Constants.TILE_SIZE - 16) < 12:
-            game.base_health -= 1
+        self_center_x = self.pos[0]
+        self_center_y = self.pos[1]
+        base_center_x = self.maze.base[0] * Constants.TILE_SIZE + half_tile_size
+        base_center_y = self.maze.base[1] * Constants.TILE_SIZE + half_tile_size
+        half_player_w = player.w // 2
+        half_player_h = player.h // 2
+        player_center_x = player.pos[0] + half_player_w
+        player_center_y = player.pos[1] + half_player_h
+        if math.hypot(self_center_x - base_center_x,
+                      self_center_y - base_center_y) < 4:
+            game.base_health -= self.hit_points
             game.score -= min(25, game.score)
             return True
-        if math.hypot(self.pos[0] - player.pos[0], self.pos[1] - player.pos[1]) < 20:
+        if math.hypot(self_center_x - player_center_x, self_center_y - player_center_y) < 14:
             if player.invincible:
                 game.score += 10
                 return True
@@ -55,6 +64,8 @@ class Enemy:
                 return True
             else:
                 player.current_speed = player.current_speed * 0.75
+                player.slow_timer = 5 * Constants.FPS
+                return True
         return False
 
     def draw(self, screen, time):

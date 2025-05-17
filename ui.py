@@ -35,8 +35,11 @@ class UI:
         y_pos = self.game.maze.height * Constants.TILE_SIZE + 5  # Position below maze
         resources_text = self.font.render(f"Resources: {self.game.player.resources}", True, Colors.WHITE)
         screen.blit(resources_text, (10, y_pos))
-        player_tile = (
-            int(self.game.player.pos[0] / Constants.TILE_SIZE), int(self.game.player.pos[1] / Constants.TILE_SIZE))
+        center = (int(self.game.player.pos[0]) + 12, int(self.game.player.pos[1]) + 12)
+        face = ({'right': center[0] + 12, 'left': center[0] - 12, 'up': center[0], 'down': center[0]}[self.game.player.direction],
+                {'right': center[1], 'left': center[1], 'up': center[1] - 12, 'down': center[1] + 12}[self.game.player.direction])
+        player_tile = (int(face[0] // Constants.TILE_SIZE),
+                       int(face[1] // Constants.TILE_SIZE))
         if player_tile in self.game.maze.spawn_points or player_tile == self.game.maze.base:
             cost_str = "N/A"
             color = Colors.GRAY

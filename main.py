@@ -65,6 +65,7 @@ class Game:
         self.last_pellet_regen_time = 0
         self.last_powerup_regen_time = 0
         self.last_menu_arrow = 0
+        self.max_base_health = 100
 
     def start_game(self):
         self.maze = Maze(self.menu_params['width'][0], self.menu_params['height'][0], self.menu_params['spawns'])
@@ -87,6 +88,7 @@ class Game:
 
     def draw(self, screen_, time):
         screen_.fill(Colors.BLACK)
+        half_tile_size = Constants.TILE_SIZE // 2
         for wall in self.maze.wall_rects:
             pygame.draw.rect(screen_, Colors.WHITE, wall)
         for wall in self.maze.one_way_walls:
@@ -94,11 +96,20 @@ class Game:
         for pellet in self.maze.pellets:
             pygame.draw.rect(screen_, Colors.YELLOW, (pellet[0] * Constants.TILE_SIZE + 14, pellet[1] * Constants.TILE_SIZE + 14, 4, 4))
         for powerup in self.maze.powerups:
-            half_tile_size = Constants.TILE_SIZE // 2
             pygame.draw.circle(screen_, Colors.PURPLE, (powerup[0] * Constants.TILE_SIZE + half_tile_size, powerup[1] * Constants.TILE_SIZE + half_tile_size), 5)
         for spawn in self.maze.spawn_points:
-            pygame.draw.rect(screen_, Colors.RED, (spawn[0] * Constants.TILE_SIZE + 1, spawn[1] * Constants.TILE_SIZE + 1, Constants.TILE_SIZE - 2, Constants.TILE_SIZE - 2))
-        pygame.draw.rect(screen_, Colors.LIGHT_BLUE, (self.maze.base[0] * Constants.TILE_SIZE, self.maze.base[1] * Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE))
+            pygame.draw.rect(screen_, Colors.DARK_RED, (spawn[0] * Constants.TILE_SIZE + 1, spawn[1] * Constants.TILE_SIZE + 1, Constants.TILE_SIZE - 2, Constants.TILE_SIZE - 2))
+
+        pygame.draw.rect(screen_, Colors.LIGHT_BLUE, (self.maze.base[0] * Constants.TILE_SIZE, self.maze.base[1] * Constants.TILE_SIZE, Constants.TILE_SIZE - 2, Constants.TILE_SIZE - 2))
+        base_x, base_y = self.maze.base
+        base_center_x = base_x * Constants.TILE_SIZE + half_tile_size
+        base_center_y = base_y * Constants.TILE_SIZE + half_tile_size
+        ratio = self.base_health / self.max_base_health
+        color = Colors.GREEN if ratio > 0.5 else Colors.YELLOW if ratio > 0.25 else Colors.RED
+        bar_width = int(24 * ratio)
+        pygame.draw.rect(screen_, color, (base_center_x - 12, base_center_y + 14, bar_width, 4))
+        pygame.draw.rect(screen_, Colors.BLACK, (base_center_x - 12, base_center_y + 14, 24, 4), 1)
+
         for tower in self.towers:
             tower.draw(screen_, time, self.tower_boost_timer)
         for enemy in self.enemies:
