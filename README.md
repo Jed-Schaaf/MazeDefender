@@ -17,11 +17,7 @@ To play MazeDefender, you need to have Python installed on your system along wit
    ```bash
    cd MazeDefender
    ```
-3. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-   Note: If a `requirements.txt` file is not present, ensure you have Pygame installed:
+3. Ensure you have Pygame installed:
    ```bash
    pip install pygame
    ```
@@ -33,6 +29,13 @@ To start the game, run the main script:
 python main.py
 ```
 Upon launching, you will be presented with a menu where you can adjust initial game parameters such as maze size, number of spawn points, waves, and enemies per wave. Use the arrow keys to navigate and modify these settings, then press Enter to begin the game.
+
+### Menu Items
+- **Width**: The number of horizontal tiles for the maze (range: 10-25; default: 20)
+- **Height**: The number of vertical tiles for the maze (range: 10-16; default: 15)
+- **Spawns**: The number of enemy spawning points (range: 1-3)
+- **Waves**: The number of enemy waves to release (0 = infinite waves)
+- **Enemies**: The number of enemies that will spawn in the first wave (minimum: 2; default: 10)
 
 ### Controls
 - **Arrow keys**: Move the player
@@ -51,6 +54,21 @@ MazeDefender combines elements of maze navigation and tower defense. The game ge
 - **Enemy AI**: Enemies have different behaviors, including chasing the player, wandering randomly around the maze, or moving towards the base. Enemies have one-way wall interactions.
 - **Power-Ups**: Temporary boosts like speed, invincibility, or enemy freeze.
 - **HUD and UI**: Displays resources, score, enemies, waves, and tower costs.
+
+- If the player collides with an enemy, the base will not receive damage, but instead the player's speed will be reduced for a short time and the player will lose a certain percentage of resources. That enemy will also be destroyed.
+- The number of enemies will increase by 2 with each successive wave. If the first wave has 10, then the second wave will have 12, the third 14, etc.
+- Enemies gain hit points on successive waves, to be equal to the wave number.
+- Enemies deal damage to the base equal to their current hit points.
+- Upgrading a tower increases its damage to be equal to its level and increases attack rate by -0.5 seconds between attacks. The maximum level is 10, with 10 damage and 0.5 seconds between attacks.
+- There is a 20-second delay at the beginning of each wave before enemies begin spawning, and a reducing delay per wave (down to a minimum) between individual enemies within a wave.
+
+## Future Enhancements
+- Add menu items for starting wave number, wave growth of number of enemies, and enemy strength increase per wave.
+- Add a timer showing the remaining time before enemies spawn per wave.
+- Add a current score display during gameplay in addition to the display at the end of a game.
+- Adjust parameters, delays, and stats to achieve better balance and engagement.
+- Change player-wall collision detection to use a circular player model instead of a rectangle for easier movement around the maze.
+- Update the player's one-way wall collision to obey the one-way directions. (Partial entry into a one-way wall needs to be addressed.)
 
 ## Code Structure
 
