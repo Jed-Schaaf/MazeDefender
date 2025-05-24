@@ -28,8 +28,12 @@ class UI:
         instructions_y = 10 + game_title.get_height() + len(self.game.menu_params) * 30 + 60
         instructions1 = self.font.render("Use arrow keys to select and change parameters.", True, Colors.WHITE)
         instructions2 = self.font.render("Press Enter to start or Q to quit.", True, Colors.WHITE)
+        instructions3 = self.font.render("In-game: move with arrow keys,", True, Colors.WHITE)
+        instructions4 = self.font.render("build/upgrade towers with spacebar, end game with ESC.", True, Colors.WHITE)
         screen.blit(instructions1, (Constants.SCREEN_WIDTH // 2 - instructions1.get_width() // 2, instructions_y))
         screen.blit(instructions2, (Constants.SCREEN_WIDTH // 2 - instructions2.get_width() // 2, instructions_y + 30))
+        screen.blit(instructions3, (Constants.SCREEN_WIDTH // 2 - instructions3.get_width() // 2, instructions_y + 60))
+        screen.blit(instructions4, (Constants.SCREEN_WIDTH // 2 - instructions4.get_width() // 2, instructions_y + 90))
 
     def draw_hud(self, screen):
         y_pos = self.game.maze.height * Constants.TILE_SIZE + 5  # Position below maze
